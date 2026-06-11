@@ -425,6 +425,9 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offs
 .fsend .alt{font-family:var(--mono);font-size:12px;color:var(--dim)}
 .fsend .alt a{color:var(--amber);text-decoration:none}
 .fsend .alt a:hover{text-decoration:underline}
+.ferr{font-family:var(--mono);font-size:12px;color:var(--coral);opacity:0;transform:translateY(-4px);
+  transition:opacity .3s,transform .3s;pointer-events:none}
+.ferr.on{opacity:1;transform:none}
 
 .plane-stage{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:visible}
 .plane-stage svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
@@ -865,9 +868,10 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offs
       </div>
       <textarea name="message" rows="4" placeholder="what should we talk about?" required></textarea>
       <div class="fsend">
-        <button class="btn btn-primary" type="submit">send it ✈</button>
+        <button class="btn btn-primary" type="button" id="sendBtn">send it ✈</button>
         <span class="alt">or directly: <a href="mailto:adithya.p.ramesh@gmail.com">email</a> · <a href="https://github.com/AdithyaPR18" target="_blank" rel="noopener">github</a> · <a href="https://www.linkedin.com/in/adithyapramesh/" target="_blank" rel="noopener">linkedin</a></span>
       </div>
+      <div class="ferr" id="formErr">fill in all three fields (and a real email) before launch ✈</div>
     </form>
     <div class="plane-stage" id="planeStage" aria-hidden="true">
       <svg>
@@ -1235,6 +1239,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offs
   const chorEls = [...document.querySelectorAll('[data-chor]')];
   function chor(vh){
     chorEls.forEach(el=>{
+      if(el.dataset.chorOff){ return; }
       const r = el.getBoundingClientRect();
       if(r.bottom < -100 || r.top > vh+100){ return; }
       let p = (vh*.94 - r.top) / (vh*.62);
@@ -1321,21 +1326,36 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offs
 
   /* ---------- contact form → paper plane ---------- */
   const cform = document.getElementById('contactForm');
+  const formErr = document.getElementById('formErr');
+  let planeBusy = false;
+  function trySend(){
+    if(planeBusy || !cform) return;
+    let bad = false;
+    cform.querySelectorAll('input,textarea').forEach(el=>{
+      const empty = !el.value.trim();
+      const badEmail = el.type==='email' && el.value && !/.+@.+\..+/.test(el.value);
+      el.classList.toggle('err', empty || badEmail);
+      if(empty || badEmail) bad = true;
+    });
+    if(formErr) formErr.classList.toggle('on', bad);
+    if(bad) return;
+    planeBusy = true;
+    const data = {};
+    cform.querySelectorAll('input,textarea').forEach(el=>{ data[el.name] = el.value; });
+    launchPlane(data);
+  }
   if(cform){
-    cform.addEventListener('submit', e=>{
-      e.preventDefault();
-      let bad = false;
-      cform.querySelectorAll('input,textarea').forEach(el=>{
-        const empty = !el.value.trim();
-        const badEmail = el.type==='email' && el.value && !/.+@.+\..+/.test(el.value);
-        el.classList.toggle('err', empty || badEmail);
-        if(empty || badEmail) bad = true;
-      });
-      if(bad) return;
-      launchPlane(Object.fromEntries(new FormData(cform).entries()));
+    const sendBtn = document.getElementById('sendBtn');
+    if(sendBtn) sendBtn.addEventListener('click', trySend);
+    cform.addEventListener('submit', e=>{ e.preventDefault(); trySend(); });
+    cform.addEventListener('keydown', e=>{
+      if(e.key==='Enter' && e.target.tagName==='INPUT'){ e.preventDefault(); trySend(); }
     });
     cform.querySelectorAll('input,textarea').forEach(el=>{
-      el.addEventListener('input', ()=>el.classList.remove('err'), {passive:true});
+      el.addEventListener('input', ()=>{
+        el.classList.remove('err');
+        if(formErr) formErr.classList.remove('on');
+      }, {passive:true});
     });
   }
   function deliver(data){
@@ -1377,6 +1397,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offs
       clip = svg.querySelector('#trailClip rect');
     }
 
+    cform.dataset.chorOff = '1';
+    cform.style.transform = ''; cform.style.opacity = '';
     cform.classList.add('folding');
     const sentMsg = document.getElementById('sentMsg');
     sentMsg.style.left = (fr.left - sr.left) + 'px';
