@@ -78,6 +78,7 @@ body{
 
 /* ---------- nav ---------- */
 nav{
+  transition:transform .5s cubic-bezier(.2,.8,.2,1);
   position:fixed;top:0;left:0;right:0;z-index:50;
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   background:rgba(6,8,13,.72);
@@ -512,7 +513,7 @@ body.recruiter .deck-progress{display:none}
 body.recruiter .skill-box li{opacity:1;transform:none;animation:none}
 .rec-only{display:none!important}
 body.recruiter .rec-only{display:inline-flex!important}
-#recruiterToggle.on{color:var(--amber)}
+nav.navhide{transform:translateY(-100%)}
 
 /* ---------- dock ---------- */
 .dock{position:fixed;right:18px;bottom:18px;z-index:80;display:flex;flex-direction:column;gap:10px}
@@ -588,6 +589,24 @@ body.recruiter .rec-only{display:inline-flex!important}
 .skill-box li.linked{cursor:pointer;transition:color .2s}
 .skill-box li.linked:hover{color:var(--amber)}
 .skill-box li.linked:hover::after{content:' ↪ 'attr(data-proj-name);color:var(--dim);font-size:11px}
+
+/* ---------- hero navwords + scroll morph ---------- */
+.navword{font-weight:600;color:var(--text);text-decoration:none;cursor:pointer;
+  border-bottom:1px solid rgba(var(--acc),.45);transition:color .2s,border-color .2s}
+.navword:hover{color:var(--amber);border-color:var(--amber)}
+#morphLayer{position:fixed;inset:0;pointer-events:none;z-index:60}
+.flyer{position:fixed;left:0;top:0;transform-origin:top left;will-change:transform,opacity;
+  white-space:nowrap;display:none;line-height:1}
+.fly-word-hero{font-family:var(--sans);font-weight:600;font-size:17.5px;color:var(--text)}
+.fly-word-nav{font-family:var(--mono);font-size:12.5px;color:var(--muted);letter-spacing:.04em}
+.fly-name-hero{font-family:var(--display);font-weight:900;font-stretch:125%;text-transform:uppercase;
+  font-size:104px;line-height:.98;letter-spacing:-.015em;color:var(--text)}
+.fly-name-hero .r2{display:block;background:linear-gradient(92deg,var(--amber),var(--coral));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.fly-name-nav{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text);letter-spacing:.02em}
+.fly-name-nav .prompt{color:var(--amber)}
+@media(prefers-reduced-motion:reduce){#morphLayer{display:none}}
+body.recruiter #morphLayer{display:none}
 
 .plane-stage{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:visible}
 .plane-stage svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
@@ -751,7 +770,7 @@ body.recruiter .rec-only{display:inline-flex!important}
       <a href="#experience">experience</a>
       <a href="#projects">projects</a>
       <a href="#skills">skills</a>
-      <a href="#" id="recruiterToggle">recruiter view</a>
+      <a href="resume.pdf" download>resume</a>
       <a class="nav-cta" href="#contact">get in touch</a>
     </div>
   </div>
@@ -762,14 +781,6 @@ body.recruiter .rec-only{display:inline-flex!important}
   <canvas id="net" aria-hidden="true"></canvas>
   <div class="wrap hero-grid">
 
-    <div class="terminal" aria-hidden="true">
-      <div class="term-bar">
-        <span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>
-        <span class="term-title">adithya@dev — agent.init</span>
-      </div>
-      <div class="term-body" id="termBody"></div>
-    </div>
-
     <div class="hero-id" id="heroId">
       <span class="hero-status"><span class="pulse"></span>SWE Intern @ IBM · watsonx.data · San Jose, CA</span>
       <h1 class="hero-name">
@@ -778,11 +789,14 @@ body.recruiter .rec-only{display:inline-flex!important}
       </h1>
       <p class="hero-sub">
         I'm a CS major at Purdue focused on AI/ML, currently at IBM on the watsonx.data team working on
-        agentic AI for production database systems. I like building things from first principles —
-        most recently a vector database written in C++ and a multimodal model for detecting AI-generated
-        fake news. What interests me most is the engineering side of ML: what it actually takes to train,
-        serve, and run models inside real systems.
+        agentic AI for production database systems. My <a class="navword" href="#experience" data-morph="experience">experience</a>
+        spans research and industry. My <a class="navword" href="#projects" data-morph="projects">projects</a> include
+        a vector database written in C++ and a multimodal fake-news detector, and my
+        <a class="navword" href="#skills" data-morph="skills">skills</a> run from model training to the systems
+        that serve models. What interests me most is the engineering side of ML: what it actually takes
+        to train, serve, and run things in production.
       </p>
+      
       <div class="hero-ctas">
         <a class="btn btn-primary" href="#projects">view projects ↓</a>
         <a class="btn btn-ghost" href="https://github.com/AdithyaPR18" target="_blank" rel="noopener">github ↗</a>
@@ -1059,10 +1073,12 @@ body.recruiter .rec-only{display:inline-flex!important}
   </div>
 </section>
 
+<div id="morphLayer" aria-hidden="true"></div>
+
 <div class="dock" aria-label="site controls">
-  <button class="term-btn" id="dockTerm" aria-label="open terminal"><span class="tip">terminal — try it (or press ~)</span>&gt;_</button>
+  <button class="term-btn" id="dockTerm" aria-label="open terminal"><span class="tip">ask the terminal about me (~)</span>&gt;_</button>
   <button id="dockTheme" aria-label="cycle theme"><span class="tip">theme</span>◐</button>
-  <button id="dockSound" aria-label="toggle sound"><span class="tip">sound</span>🔇</button>
+  <button id="dockSound" aria-label="toggle sound"><span class="tip">sound</span>🔊</button>
 </div>
 
 <div class="termo" id="termo" role="dialog" aria-label="terminal">
@@ -1078,7 +1094,13 @@ body.recruiter .rec-only{display:inline-flex!important}
 </div>
 
 <div id="boot" aria-hidden="true">
-  <div class="bin" id="bootLines"><div class="bbar"><i id="bootBar"></i></div></div>
+  <div class="terminal" style="width:min(620px,88vw)" aria-hidden="true">
+    <div class="term-bar">
+      <span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>
+      <span class="term-title">adithya@dev — agent.init</span>
+    </div>
+    <div class="term-body" id="bootTerm"></div>
+  </div>
 </div>
 
 <footer>
@@ -1100,54 +1122,59 @@ body.recruiter .rec-only{display:inline-flex!important}
   readAccents();
   const MOTION = ()=> !reduced && !document.body.classList.contains('recruiter');
 
-  /* ---------- hero terminal boot sequence ---------- */
-  const lines = [
-    {html:'<span class="p">$</span> ./init_agent <span class="dim">--profile</span> <span class="hl">adithya</span>', t:34},
-    {html:'<span class="dim">›</span> loading model weights <span class="dim">.............</span> <span class="ok">OK</span>', t:16},
-    {html:'<span class="dim">›</span> warming vector index <span class="dim">..............</span> <span class="ok">OK</span>', t:16},
-    {html:'<span class="dim">›</span> telemetry stream <span class="dim">..................</span> <span class="ok">LIVE</span>', t:16},
-    {html:'<span class="dim">›</span> profile: <span class="hl">purdue_cs · ml systems · agentic ai</span>', t:16},
-    {html:'<span class="ok">✓</span> agent online <span class="dim">— currently deployed @</span> <span class="hl">IBM watsonx.data</span>', t:18},
+  /* ---------- first-visit boot: typed agent sequence in the splash ---------- */
+  const bootLines = [
+    {html:'<span class="p">$</span> ./init_agent <span class="dim">--profile</span> <span class="hl">adithya</span>', t:22},
+    {html:'<span class="dim">›</span> loading model weights <span class="dim">.......</span> <span class="ok">OK</span>', t:9},
+    {html:'<span class="dim">›</span> warming vector index <span class="dim">........</span> <span class="ok">OK</span>', t:9},
+    {html:'<span class="dim">›</span> telemetry stream <span class="dim">............</span> <span class="ok">LIVE</span>', t:9},
+    {html:'<span class="dim">›</span> profile: <span class="hl">purdue_cs · ml systems · agentic ai</span>', t:9},
+    {html:'<span class="ok">✓</span> agent online <span class="dim">— deployed @</span> <span class="hl">IBM watsonx.data</span>', t:11},
   ];
-  const term = document.getElementById('termBody');
   const heroId = document.getElementById('heroId');
+  const bootEl = document.getElementById('boot');
+  const bootTerm = document.getElementById('bootTerm');
 
-  function typeLine(i){
-    if(i >= lines.length){
-      const c = document.createElement('span'); c.className='caret'; term.appendChild(c);
-      heroId.classList.add('on');
-      return;
-    }
-    const div = document.createElement('div'); div.className='tl'; term.appendChild(div);
-    const tmp = document.createElement('div'); tmp.innerHTML = lines[i].html;
-    const nodes = [];
-    (function flatten(parent, into){
-      parent.childNodes.forEach(n=>{
-        if(n.nodeType===3){ n.textContent.split('').forEach(ch=>into.push({ch, wrap:null})); }
-        else { n.textContent.split('').forEach(ch=>into.push({ch, wrap:n.className})); }
-      });
-    })(tmp, nodes);
-    let j=0;
-    (function tick(){
-      if(j>=nodes.length){ setTimeout(()=>typeLine(i+1), 130); return; }
-      const {ch,wrap} = nodes[j++];
-      if(wrap){
-        const last = div.lastChild;
-        if(last && last.nodeType===1 && last.className===wrap){ last.textContent += ch; }
-        else { const s=document.createElement('span'); s.className=wrap; s.textContent=ch; div.appendChild(s); }
-      } else {
-        div.appendChild(document.createTextNode(ch));
-      }
-      setTimeout(tick, lines[i].t);
-    })();
-  }
-
-  if(reduced){
-    term.innerHTML = lines.map(l=>'<div class="tl">'+l.html+'</div>').join('');
+  function finishBoot(){
+    if(bootEl){ bootEl.classList.add('gone'); setTimeout(()=>bootEl.remove(), 600); }
     heroId.classList.add('on');
-  } else {
-    setTimeout(()=>typeLine(0), 350);
   }
+  (function runBoot(){
+    let seen = false;
+    try{ seen = !!sessionStorage.getItem('pf_boot'); }catch(e){}
+    if(seen || reduced || !bootEl || !bootTerm){ finishBoot(); return; }
+    try{ sessionStorage.setItem('pf_boot','1'); }catch(e){}
+    function typeLine(i){
+      if(i >= bootLines.length){
+        const c = document.createElement('span'); c.className='caret'; bootTerm.appendChild(c);
+        setTimeout(finishBoot, 480);
+        return;
+      }
+      const div = document.createElement('div'); div.className='tl'; bootTerm.appendChild(div);
+      const tmp = document.createElement('div'); tmp.innerHTML = bootLines[i].html;
+      const nodes = [];
+      (function flatten(parent, into){
+        parent.childNodes.forEach(n=>{
+          if(n.nodeType===3){ n.textContent.split('').forEach(ch=>into.push({ch, wrap:null})); }
+          else { n.textContent.split('').forEach(ch=>into.push({ch, wrap:n.className})); }
+        });
+      })(tmp, nodes);
+      let j=0;
+      (function tick(){
+        if(j>=nodes.length){ setTimeout(()=>typeLine(i+1), 70); return; }
+        const {ch,wrap} = nodes[j++];
+        if(wrap){
+          const last = div.lastChild;
+          if(last && last.nodeType===1 && last.className===wrap){ last.textContent += ch; }
+          else { const sp=document.createElement('span'); sp.className=wrap; sp.textContent=ch; div.appendChild(sp); }
+        } else {
+          div.appendChild(document.createTextNode(ch));
+        }
+        setTimeout(tick, bootLines[i].t);
+      })();
+    }
+    setTimeout(()=>typeLine(0), 260);
+  })();
 
   /* ---------- scroll reveals ---------- */
   const io = new IntersectionObserver((entries)=>{
@@ -1416,13 +1443,14 @@ body.recruiter .rec-only{display:inline-flex!important}
       });
       /* hero: mouse-driven 3D + apple-style scroll-away */
       if(heroGrid && sy < vh*1.4 && !document.body.classList.contains('recruiter')){
-        /* hold steady until 50% vh scrolled, then recede over the next 55% */
-        const t = Math.min(Math.max((sy - vh*.5)/(vh*.55), 0), 1);
+        /* hold steady until 70% vh scrolled, then recede — CTAs stay usable */
+        const t = Math.min(Math.max((sy - vh*.7)/(vh*.45), 0), 1);
         heroGrid.style.transform =
           `rotateX(${-my*2.4}deg) rotateY(${mx*3.2}deg) translateY(${sy*.08}px) scale(${1-t*.06})`;
         heroGrid.style.opacity = 1 - t*.92;
         heroGrid.style.filter = t>0 ? `blur(${t*4}px)` : '';
       }
+      morphStep(sy, vh);
       /* glass shards: scroll-driven 3D drift */
       shards.forEach((el,i)=>{
         const k = i+1;
@@ -1434,7 +1462,7 @@ body.recruiter .rec-only{display:inline-flex!important}
       requestAnimationFrame(fxFrame);
     }
   }
-  if(reduced){ window.addEventListener('scroll', drawTrace, {passive:true}); drawTrace(); }
+  if(reduced){ window.addEventListener('scroll', drawTrace, {passive:true}); drawTrace(); morphStep(0, window.innerHeight); }
   else { requestAnimationFrame(fxFrame); }
 
   /* ---------- directional scroll choreography ---------- */
@@ -1525,6 +1553,92 @@ body.recruiter .rec-only{display:inline-flex!important}
     bcar.addEventListener('pointercancel', release);
   }
 
+
+
+  /* ================= HERO → NAVBAR SCROLL MORPH ================= */
+  const morphLayer = document.getElementById('morphLayer');
+  const morphItems = [];
+  (function buildMorph(){
+    if(!morphLayer) return;
+    function mkFlyer(cls, html){
+      const f = document.createElement('div');
+      f.className = 'flyer ' + cls; f.innerHTML = html;
+      morphLayer.appendChild(f);
+      return f;
+    }
+    function natural(f){
+      const prev = f.style.display; f.style.display='block'; f.style.transform='none';
+      const r = f.getBoundingClientRect();
+      f.style.display = prev || 'none';
+      return {w:r.width||1, h:r.height||1};
+    }
+    /* name → logo */
+    const heroName = document.querySelector('.hero-name');
+    const navLogo = document.querySelector('.nav-logo');
+    if(heroName && navLogo){
+      morphItems.push({
+        src: heroName, dst: navLogo,
+        fa: mkFlyer('fly-name-hero', 'Adithya<span class="r2">Ramesh</span>'),
+        fb: mkFlyer('fly-name-nav', '<span class="prompt">~/</span>adithya'),
+      });
+    }
+    /* navwords → nav links */
+    document.querySelectorAll('.hero-sub [data-morph]').forEach(a=>{
+      const word = a.dataset.morph;
+      const dst = document.querySelector('.nav-links a[href="#'+word+'"]');
+      if(!dst) return;
+      morphItems.push({
+        src: a, dst,
+        fa: mkFlyer('fly-word-hero', word),
+        fb: mkFlyer('fly-word-nav', word),
+      });
+    });
+    function measure(){ morphItems.forEach(it=>{ it.faN = natural(it.fa); it.fbN = natural(it.fb); }); }
+    measure();
+    window.addEventListener('load', measure);
+    window.addEventListener('resize', ()=>setTimeout(measure, 200), {passive:true});
+  })();
+
+  function morphStep(sy, vh){
+    if(!morphItems.length) return;
+    const off = !MOTION();
+    const pm = off ? 1 : Math.min(Math.max((sy - vh*.68)/(vh*.34), 0), 1);
+    const navEl = document.querySelector('nav');
+    if(navEl){
+      const mobile = window.matchMedia('(max-width:880px)').matches;
+      navEl.classList.toggle('navhide', !off && !mobile && pm <= 0);
+    }
+    morphItems.forEach(it=>{
+      const dstVisible = it.dst.offsetParent !== null; /* nav links hidden on mobile */
+      if(off || !dstVisible){
+        it.dst.style.opacity = ''; it.src.style.opacity = '';
+        it.fa.style.display = it.fb.style.display = 'none';
+        return;
+      }
+      if(pm <= 0){
+        it.src.style.opacity = ''; it.dst.style.opacity = '0';
+        it.fa.style.display = it.fb.style.display = 'none';
+        return;
+      }
+      if(pm >= 1){
+        it.src.style.opacity = '0'; it.dst.style.opacity = '';
+        it.fa.style.display = it.fb.style.display = 'none';
+        return;
+      }
+      it.src.style.opacity = '0'; it.dst.style.opacity = '0';
+      const sR = it.src.getBoundingClientRect();
+      const dR = it.dst.getBoundingClientRect();
+      const e = pm<.5 ? 2*pm*pm : 1-Math.pow(-2*pm+2,2)/2;
+      const L = sR.left + (dR.left - sR.left)*e;
+      const T = sR.top  + (dR.top  - sR.top )*e;
+      const H = sR.height + (dR.height - sR.height)*e;
+      it.fa.style.display = it.fb.style.display = 'block';
+      it.fa.style.transform = `translate(${L}px,${T}px) scale(${H/it.faN.h})`;
+      it.fb.style.transform = `translate(${L}px,${T}px) scale(${H/it.fbN.h})`;
+      it.fa.style.opacity = (1-e);
+      it.fb.style.opacity = e;
+    });
+  }
 
   /* ---------- contact form → paper plane ---------- */
   const cform = document.getElementById('contactForm');
@@ -1645,7 +1759,10 @@ body.recruiter .rec-only{display:inline-flex!important}
 
 
   /* ================= SOUND ENGINE (off by default) ================= */
-  let AC=null, SOUND=false;
+  let AC=null, SOUND=true; /* on by default; browsers unlock audio on first interaction */
+  ['pointerdown','keydown','touchstart'].forEach(ev=>window.addEventListener(ev, function unlock(){
+    if(SOUND){ const a=actx(); if(a && a.state==='suspended') a.resume().catch(()=>{}); }
+  }, {passive:true}));
   function actx(){ try{ return AC || (AC = new (window.AudioContext||window.webkitAudioContext)()); }catch(e){ return null; } }
   function sTick(f){ if(!SOUND) return; const a=actx(); if(!a) return;
     const o=a.createOscillator(), g=a.createGain();
@@ -1676,7 +1793,7 @@ body.recruiter .rec-only{display:inline-flex!important}
     dockSound.firstChild.nextSibling ? null : 0;
     dockSound.innerHTML = '<span class="tip">sound</span>' + (SOUND?'🔊':'🔇');
     if(SOUND) sTick(900);
-    try{ localStorage.setItem('pf_sound', SOUND?'1':''); }catch(e){}
+    try{ localStorage.setItem('pf_sound', SOUND?'1':'0'); }catch(e){}
   });
 
   const THEMES = ['amber','ice','violet'];
@@ -1694,19 +1811,22 @@ body.recruiter .rec-only{display:inline-flex!important}
   });
   try{
     const st = localStorage.getItem('pf_theme'); if(st && st!=='amber') setTheme(st);
-    if(localStorage.getItem('pf_sound')) { SOUND=true; if(dockSound) dockSound.innerHTML='<span class="tip">sound</span>🔊'; }
+    const sv = localStorage.getItem('pf_sound');
+    SOUND = (sv===null) ? true : sv==='1';
+    if(dockSound) dockSound.innerHTML = '<span class="tip">sound</span>' + (SOUND?'🔊':'🔇');
   }catch(e){}
 
   /* ================= RECRUITER MODE ================= */
   const recT = document.getElementById('recruiterToggle');
   function setRecruiter(on){
     document.body.classList.toggle('recruiter', on);
-    if(recT) recT.classList.toggle('on', on);
+    setTimeout(()=>morphStep(window.scrollY, window.innerHeight), 50);
+    if(recT){ recT.classList.toggle('on', on); recT.textContent = on ? '✕ exit recruiter view' : 'recruiter view'; }
     if(on){ window.scrollTo({top:window.scrollY, behavior:'auto'}); }
-    try{ localStorage.setItem('pf_rec', on?'1':''); }catch(e){}
+    /* deliberately NOT persisted — the full-motion site is always the default on load */
   }
   if(recT) recT.addEventListener('click', e=>{ e.preventDefault(); setRecruiter(!document.body.classList.contains('recruiter')); });
-  try{ if(localStorage.getItem('pf_rec')) setRecruiter(true); }catch(e){}
+  try{ localStorage.removeItem('pf_rec'); }catch(e){} /* self-heal any previously stuck state */
 
   /* ================= GITHUB HEARTBEAT ================= */
   (function ghLive(){
@@ -1791,7 +1911,7 @@ body.recruiter .rec-only{display:inline-flex!important}
   /* ================= CASE STUDY MODALS ================= */
   /* paste live demo URLs here to embed them in the case studies */
   const EMBEDS = {
-    sweat: '',    // e.g. deployed Sweat Together URL
+    sweat: '', /* deployed app sits behind a login — linking instead of embedding */
     veritas: '',  // e.g. https://huggingface.co/spaces/<user>/<space>  (use the ?embed=true URL)
   };
   const CASES = {
@@ -1809,7 +1929,7 @@ body.recruiter .rec-only{display:inline-flex!important}
       problem:'Form feedback during workouts usually requires a trainer watching you. The question: could a browser camera and a pose model close that loop live?',
       approach:'Real-time pose estimation running against the webcam feed, with form tracking and live feedback in the loop. React front end, Flask backend, CV pipeline streaming keypoints continuously.',
       results:'A working end-to-end platform — camera in, feedback out, in real time. The hard part was everything around the model: frame rates, keypoint smoothing, and making feedback feel instant instead of laggy.',
-      link:'https://github.com/AdithyaPR18/sweat-together', embed:'sweat' },
+      link:'https://github.com/AdithyaPR18/sweat-together', live:'https://sweat-together.vercel.app/' },
     rag: { tag:'AGENTIC AI · RETRIEVAL', title:'Agentic RAG Pipeline',
       problem:'Plain RAG retrieves once and hopes. Complex questions need decomposition, multiple retrievals, and synthesis that stays grounded in what was actually found.',
       approach:'An orchestration layer that decomposes queries, retrieves per sub-question against a vector store, and synthesizes grounded answers — agentic control flow around the retrieval loop.',
@@ -1830,7 +1950,7 @@ body.recruiter .rec-only{display:inline-flex!important}
       '<div class="cs-sec"><h6>THE APPROACH</h6><p>'+c.approach+'</p></div>' +
       '<div class="cs-sec"><h6>RESULTS</h6><p>'+c.results+'</p></div>' +
       embedHtml +
-      '<div class="cs-foot"><a class="dlink" href="'+c.link+'" target="_blank" rel="noopener">view source ↗</a></div>';
+      '<div class="cs-foot"><a class="dlink" href="'+c.link+'" target="_blank" rel="noopener">view source ↗</a>' + (c.live ? ' <a class="dlink" href="'+c.live+'" target="_blank" rel="noopener">live app ↗</a>' : '') + '</div>';
     csModal.classList.add('open');
     csBox.querySelector('.cs-close').addEventListener('click', csClose);
     sTick(820);
@@ -1875,26 +1995,7 @@ body.recruiter .rec-only{display:inline-flex!important}
   }, {passive:true});
 
   /* ================= BOOT SPLASH (first visit per session) ================= */
-  (function bootSplash(){
-    const boot = document.getElementById('boot'); if(!boot) return;
-    let seen = false;
-    try{ seen = !!sessionStorage.getItem('pf_boot'); }catch(e){}
-    if(seen || reduced){ boot.classList.add('gone'); setTimeout(()=>boot.remove(), 600); return; }
-    try{ sessionStorage.setItem('pf_boot','1'); }catch(e){}
-    const lines = [
-      '<span class="p">$</span> init adithya.dev',
-      'loading systems ............. <span class="ok">OK</span>',
-      'agent online <span class="ok">✓</span>',
-    ];
-    const holder = document.getElementById('bootLines');
-    const bar = document.getElementById('bootBar');
-    lines.forEach((l,i)=> setTimeout(()=>{
-      const d=document.createElement('div'); d.innerHTML=l;
-      holder.insertBefore(d, holder.querySelector('.bbar'));
-      bar.style.width = ((i+1)/lines.length*100)+'%';
-    }, 200+i*330));
-    setTimeout(()=>{ boot.classList.add('gone'); setTimeout(()=>boot.remove(), 600); }, 200+lines.length*330+380);
-  })();
+
 
   /* sound hooks into existing systems */
   (function hookSounds(){
